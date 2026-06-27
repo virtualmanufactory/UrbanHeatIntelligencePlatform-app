@@ -1,13 +1,24 @@
 # Urban Heat Intelligence Platform
 
-Two modules:
+Modules:
 
-- `backend-java/` — Spring Boot REST API (Maven, Java 21, Spring Boot 4.0.x). Persists `HeatMeasurement` rows in PostgreSQL and exposes `GET /api/heat`.
-- `frontend-angular/` — Angular 20 SPA that consumes the backend and renders the measurements. Dev server runs on port `3000` (the only origin allowed by the backend's CORS config in `CorsConfig.java`).
+- `backend-java/` — Spring Boot REST API (Maven, Java 21, Spring Boot 4.0.x). Persists `HeatMeasurement` rows in PostgreSQL, exposes `GET /api/heat`, and **consumes** the `heat-measurements` Kafka topic to ingest measurements.
+- `backend-python-gis/` — FastAPI service (Python 3.12). Pulls land-surface temperature from **Google Earth Engine** and **produces** to the `heat-measurements` Kafka topic. Runs on port `8000`.
+- `frontend-angular/` — Angular 20 SPA that consumes the Java API and renders the measurements. Dev server runs on port `3000` (the only origin allowed by the backend's CORS config in `CorsConfig.java`).
+
+Data flow:
+
+```
+Google Earth Engine ─▶ backend-python-gis ─(Kafka: heat-measurements)─▶ backend-java ─▶ PostgreSQL ─▶ frontend-angular
+```
 
 ## Cursor Cloud specific instructions
 
-The environment snapshot already has Java 21, Maven, PostgreSQL 16, and Node 22 installed; the startup update script pre-resolves Maven dependencies and runs `npm install` for the frontend. The notes below cover non-obvious startup/run caveats.
+The environment snapshot already has Java 21, Maven, PostgreSQL 16, Node 22, Python 3.12 (+venv), and Kafka 3.9 (KRaft, at `/opt/kafka`) installed. The startup update script pre-resolves Maven deps, runs `npm install` for the frontend, and installs the Python venv. The notes below cover non-obvious startup/run caveats.
+
+### Jackson note (backend-java)
+
+Spring Boot 4 ships **Jackson 3**, whose `ObjectMapper` lives in package `tools.jackson.databind` (not `com.fasterxml.jackson.databind`). Jackson *annotations* (`@JsonFormat`, `@JsonIgnoreProperties`, …) are still under `com.fasterxml.jackson.annotation`. Kafka auto-configuration requires the granular `spring-boot-starter-kafka` (the bare `spring-kafka` artifact has no Spring Boot auto-config, so `@KafkaListener` silently does nothing).
 
 ### Database (required before running the app or building anything that boots Spring)
 
@@ -20,6 +31,18 @@ sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='urban_heat'"
 ```
 
 The schema is created automatically by Hibernate (`spring.jpa.hibernate.ddl-auto=update`) on first boot — no migrations to run.
+
+### Kafka (required for the GIS → Java ingestion pipeline)
+
+Kafka 3.9 runs in single-node KRaft mode from `/opt/kafka` (storage already formatted under `/opt/kafka/data`). It is NOT auto-started:
+
+```bash
+/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/kraft/server.properties   # serves PLAINTEXT on localhost:9092
+# topic is auto-created on first use; to create explicitly:
+/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --if-not-exists --topic heat-measurements --partitions 1 --replication-factor 1
+```
+
+`backend-java` subscribes to `heat-measurements` on startup; if Kafka is down it logs connection retries but still starts and serves `/api/heat`.
 
 ### Running the backend
 
@@ -42,12 +65,21 @@ All commands run from `frontend-angular/` (Angular CLI 20; requires Node 22.12+,
 
 The backend base URL is hardcoded in `frontend-angular/src/app/heat.service.ts` (`http://localhost:8080/api/heat`).
 
-### Smoke test
+### Running the Python GIS service
+
+From `backend-python-gis/` (the update script creates `.venv` and installs requirements):
+
+- Run (dev): `.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` — serves on port `8000` (Swagger UI at `/docs`).
+- Trigger ingestion: `curl -X POST http://localhost:8000/ingest` (optional JSON body `{ "date": "YYYY-MM-DD", "points": [...] }`).
+
+Google Earth Engine auth is optional. Without `GEE_PROJECT` + service-account credentials (`GEE_SERVICE_ACCOUNT` / `GEE_SERVICE_ACCOUNT_KEY_FILE`), the service runs in deterministic **mock** mode (still produces to Kafka). `GET /health` reports the active mode (`earth-engine` vs `mock`).
+
+### End-to-end smoke test (full pipeline)
+
+With PostgreSQL, Kafka, `backend-java`, and `backend-python-gis` all running:
 
 ```bash
-curl -s http://localhost:8080/api/heat   # -> [] initially
-# seed a row, then GET again returns it:
-PGPASSWORD=root psql -h localhost -U postgres -d urban_heat \
-  -c "INSERT INTO heat_measurement (latitude, longitude, temperature, measurement_date) VALUES (40.7128, -74.0060, 35.6, '2026-06-27');"
-curl -s http://localhost:8080/api/heat   # -> [{"latitude":40.7128,"longitude":-74.006,"temperature":35.6}]
+curl -s -X POST http://localhost:8000/ingest -H 'Content-Type: application/json' -d '{"date":"2026-06-27"}'
+sleep 3
+curl -s http://localhost:8080/api/heat   # now includes the ingested measurements
 ```
