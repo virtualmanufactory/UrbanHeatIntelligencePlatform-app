@@ -1,10 +1,13 @@
-# Urban Heat Intelligence Platform — Java Backend
+# Urban Heat Intelligence Platform
 
-A Spring Boot REST API exposing urban heat measurements. The single module lives in `backend-java/` (Maven, Java 21, Spring Boot 4.0.x). It persists `HeatMeasurement` rows in PostgreSQL and exposes `GET /api/heat`.
+Two modules:
+
+- `backend-java/` — Spring Boot REST API (Maven, Java 21, Spring Boot 4.0.x). Persists `HeatMeasurement` rows in PostgreSQL and exposes `GET /api/heat`.
+- `frontend-angular/` — Angular 20 SPA that consumes the backend and renders the measurements. Dev server runs on port `3000` (the only origin allowed by the backend's CORS config in `CorsConfig.java`).
 
 ## Cursor Cloud specific instructions
 
-The environment snapshot already has Java 21, Maven, and PostgreSQL 16 installed; the startup update script pre-resolves Maven dependencies. The notes below cover non-obvious startup/run caveats.
+The environment snapshot already has Java 21, Maven, PostgreSQL 16, and Node 22 installed; the startup update script pre-resolves Maven dependencies and runs `npm install` for the frontend. The notes below cover non-obvious startup/run caveats.
 
 ### Database (required before running the app or building anything that boots Spring)
 
@@ -18,7 +21,7 @@ sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='urban_heat'"
 
 The schema is created automatically by Hibernate (`spring.jpa.hibernate.ddl-auto=update`) on first boot — no migrations to run.
 
-### Running
+### Running the backend
 
 All commands run from `backend-java/`:
 
@@ -27,7 +30,17 @@ All commands run from `backend-java/`:
 - Tests: there are currently no test sources under `src/test`, so `mvn test` is a no-op.
 - Lint: no linter is configured in this repo.
 
-Note: `target/` is checked into git, so a build will show modified/untracked files under `backend-java/target/` — do not commit those.
+Gotcha: `target/` is checked into git. Do NOT run `git clean`/`git checkout` on `backend-java/target/` while `mvn spring-boot:run` is active — devtools watches `target/classes` and will hot-restart into a broken state (component scan finds 0 controllers/repositories, so `/api/heat` returns 404). If that happens, stop and restart `mvn spring-boot:run`. Also do not commit modified/untracked files under `backend-java/target/`.
+
+### Running the frontend
+
+All commands run from `frontend-angular/` (Angular CLI 20; requires Node 22.12+, which the snapshot's `/exec-daemon/node` satisfies):
+
+- Run (dev): `npm start` — serves on port `3000` (configured in `angular.json`). The backend must be running on `8080` first, otherwise the page loads but shows a connection error.
+- Build: `npm run build`.
+- Unit tests (headless): `npm test -- --watch=false --browsers=ChromeHeadless` (Chrome is preinstalled at `/usr/bin/google-chrome`).
+
+The backend base URL is hardcoded in `frontend-angular/src/app/heat.service.ts` (`http://localhost:8080/api/heat`).
 
 ### Smoke test
 

@@ -1,0 +1,72 @@
+<div class="page">
+  <header class="hero">
+    <div class="hero__content">
+      <span class="hero__badge">Urban Heat Intelligence Platform</span>
+      <h1 class="hero__title">Pomiary temperatury miejskiej</h1>
+      <p class="hero__subtitle">
+        Dane na żywo z backendu Spring Boot &mdash; <code>GET /api/heat</code>
+      </p>
+    </div>
+    <button class="btn" (click)="load()" [disabled]="loading()">
+      {{ loading() ? 'Ładowanie…' : 'Odśwież' }}
+    </button>
+  </header>
+
+  <section class="stats">
+    <div class="stat-card">
+      <span class="stat-card__label">Liczba pomiarów</span>
+      <span class="stat-card__value">{{ count() }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__label">Średnia temperatura</span>
+      <span class="stat-card__value">
+        {{ avgTemperature() !== null ? (avgTemperature() | number: '1.1-1') + ' °C' : '—' }}
+      </span>
+    </div>
+    <div class="stat-card stat-card--accent">
+      <span class="stat-card__label">Maksymalna temperatura</span>
+      <span class="stat-card__value">
+        {{ maxTemperature() !== null ? (maxTemperature() | number: '1.1-1') + ' °C' : '—' }}
+      </span>
+    </div>
+  </section>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  @if (loading() && measurements().length === 0) {
+    <div class="alert">Ładowanie danych…</div>
+  } @else if (!error() && measurements().length === 0) {
+    <div class="alert">Brak pomiarów w bazie danych.</div>
+  } @else if (measurements().length > 0) {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Szerokość geogr.</th>
+            <th>Długość geogr.</th>
+            <th>Temperatura</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of measurements(); track $index) {
+            <tr>
+              <td>{{ $index + 1 }}</td>
+              <td>{{ m.latitude | number: '1.4-4' }}</td>
+              <td>{{ m.longitude | number: '1.4-4' }}</td>
+              <td>
+                <span class="temp-pill">{{ m.temperature | number: '1.1-1' }} °C</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <footer class="footer">
+    Angular {{ '20' }} frontend &middot; integruje się z backendem na porcie 8080
+  </footer>
+</div>
