@@ -1,1 +1,17 @@
+com\virtualmanufactory\exception\ApiException.class
+com\virtualmanufactory\exception\ResourceNotFoundException.class
+com\virtualmanufactory\config\CorsConfig.class
 com\virtualmanufactory\SpringBootUrbanHeatApplication.class
+com\virtualmanufactory\exception\dto\ErrorResponseDto.class
+com\virtualmanufactory\config\CorsConfig$1.class
+com\virtualmanufactory\controller\HeatMeasurementController.class
+com\virtualmanufactory\entity\HeatMeasurement$HeatMeasurementBuilder.class
+com\virtualmanufactory\exception\GlobalExceptionHandler.class
+com\virtualmanufactory\messaging\HeatMeasurementKafkaListener.class
+com\virtualmanufactory\repository\HeatMeasurementRepository.class
+com\virtualmanufactory\entity\HeatMeasurement.class
+com\virtualmanufactory\dto\HeatMeasurementDto.class
+com\virtualmanufactory\exception\dto\ErrorResponseDto$ErrorResponseDtoBuilder.class
+com\virtualmanufactory\service\HeatMeasurementService.class
+com\virtualmanufactory\dto\HeatMeasurementDto$HeatMeasurementDtoBuilder.class
+com\virtualmanufactory\dto\HeatMeasurementMessage.class
