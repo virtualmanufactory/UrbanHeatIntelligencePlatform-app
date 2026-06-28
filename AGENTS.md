@@ -22,12 +22,12 @@ Spring Boot 4 ships **Jackson 3**, whose `ObjectMapper` lives in package `tools.
 
 ### Database (required before running the app or building anything that boots Spring)
 
-The app connects over TCP to PostgreSQL using the credentials hardcoded in `backend-java/src/main/resources/application.properties` (`jdbc:postgresql://localhost:5432/urban_heat`, user `postgres`, password `root`). PostgreSQL is NOT auto-started, so start it and ensure the role password + database exist each session:
+The app connects over TCP to PostgreSQL using the credentials hardcoded in `backend-java/src/main/resources/application.properties` (`jdbc:postgresql://localhost:5432/urban_heat_db`, user `postgres`, password `root`). PostgreSQL is NOT auto-started, so start it and ensure the role password + database exist each session:
 
 ```bash
 sudo pg_ctlcluster 16 main start
 sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'root';"
-sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='urban_heat'" | grep -q 1 || sudo -u postgres psql -c "CREATE DATABASE urban_heat;"
+sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='urban_heat_db'" | grep -q 1 || sudo -u postgres psql -c "CREATE DATABASE urban_heat_db;"
 ```
 
 The schema is created automatically by Hibernate (`spring.jpa.hibernate.ddl-auto=update`) on first boot — no migrations to run.
@@ -68,6 +68,8 @@ The backend base URL is hardcoded in `frontend-angular/src/app/heat.service.ts` 
 ### Running the Python GIS service
 
 From `backend-python-gis/` (the update script creates `.venv` and installs requirements):
+
+> The Kafka producer (`app/kafka_producer.py`) imports `confluent_kafka` (the librdkafka-backed client), which is pinned in `requirements.txt`. `kafka-python` is also listed but unused. If you reinstall deps while `uvicorn --reload` is running, the reloader can stay crashed on a stale `ModuleNotFoundError`; stop and restart the uvicorn process.
 
 - Run (dev): `.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` — serves on port `8000` (Swagger UI at `/docs`).
 - Trigger ingestion: `curl -X POST http://localhost:8000/ingest` (optional JSON body `{ "date": "YYYY-MM-DD", "points": [...] }`).
