@@ -1,0 +1,72 @@
+.form-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 14px;
+  padding: 1.2rem;
+  margin-bottom: 2rem;
+
+  &__label {
+    display: block;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+  }
+
+  &__input {
+    width: 100%;
+    max-width: 220px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 10px;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.95rem;
+    color: #f1f5f9;
+    background: rgba(15, 23, 42, 0.8);
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+
+  &__hint {
+    margin: 0.75rem 0 0;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.cities {
+  margin-bottom: 2rem;
+
+  &__title {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    color: #f1f5f9;
+  }
+}
+
+.result {
+  &__title {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    color: #f1f5f9;
+  }
+
+  &__footer {
+    margin: 1.5rem 0 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+
+    a {
+      color: #fb923c;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.stat-card__value--small {
+  font-size: 1.1rem;
+}

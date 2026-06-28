@@ -1,30 +1,29 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
+import { routes } from './app.routes';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter(routes)],
     }).compileComponents();
   });
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    const httpMock = TestBed.inject(HttpTestingController);
-    httpMock.expectOne('http://localhost:8080/api/heat').flush([]);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
-  it('should render the heading', () => {
+  it('should render navigation links', () => {
     const fixture = TestBed.createComponent(App);
-    const httpMock = TestBed.inject(HttpTestingController);
-    httpMock.expectOne('http://localhost:8080/api/heat').flush([]);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Pomiary temperatury miejskiej');
+    expect(compiled.querySelector('.nav__brand')?.textContent).toContain('Urban Heat');
+    expect(compiled.textContent).toContain('Ingest');
   });
 });
