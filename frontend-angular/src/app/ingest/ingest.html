@@ -1,0 +1,113 @@
+<div class="page">
+  <header class="hero">
+    <div class="hero__content">
+      <span class="hero__badge">Urban Heat Intelligence Platform</span>
+      <h1 class="hero__title">Ingest pomiarów</h1>
+      <p class="hero__subtitle">
+        Pobierz temperaturę z Google Earth Engine i wyślij do Kafka &mdash;
+        <code>POST /ingest</code>
+      </p>
+    </div>
+    <button class="btn" (click)="runIngest()" [disabled]="ingesting()">
+      {{ ingesting() ? 'Ingest w toku…' : 'Uruchom ingest' }}
+    </button>
+  </header>
+
+  <section class="form-card">
+    <label class="form-card__label" for="measurement-date">Data pomiaru</label>
+    <input
+      id="measurement-date"
+      class="form-card__input"
+      type="date"
+      [(ngModel)]="measurementDate"
+      [disabled]="ingesting()"
+    />
+    <p class="form-card__hint">
+      Bez własnych punktów ingest użyje domyślnych miast poniżej.
+    </p>
+  </section>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  @if (loadingCities()) {
+    <div class="alert">Ładowanie domyślnych miast…</div>
+  } @else if (cities().length > 0) {
+    <section class="cities">
+      <h2 class="cities__title">Domyślne miasta</h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Miasto</th>
+              <th>Szerokość geogr.</th>
+              <th>Długość geogr.</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (city of cities(); track city.name) {
+              <tr>
+                <td>{{ city.name }}</td>
+                <td>{{ city.latitude | number: '1.4-4' }}</td>
+                <td>{{ city.longitude | number: '1.4-4' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @if (result()) {
+    <section class="result">
+      <h2 class="result__title">Wynik ingestu</h2>
+      <div class="stats">
+        <div class="stat-card">
+          <span class="stat-card__label">Tryb GEE</span>
+          <span class="stat-card__value stat-card__value--small">{{ result()!.mode }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Topic Kafka</span>
+          <span class="stat-card__value stat-card__value--small">{{ result()!.topic }}</span>
+        </div>
+        <div class="stat-card stat-card--accent">
+          <span class="stat-card__label">Opublikowano</span>
+          <span class="stat-card__value">{{ result()!.published }}</span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Miasto</th>
+              <th>Szerokość geogr.</th>
+              <th>Długość geogr.</th>
+              <th>Temperatura</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of result()!.measurements; track $index) {
+              <tr>
+                <td>{{ m.name ?? '—' }}</td>
+                <td>{{ m.latitude | number: '1.4-4' }}</td>
+                <td>{{ m.longitude | number: '1.4-4' }}</td>
+                <td>
+                  <span class="temp-pill">{{ m.temperature | number: '1.1-1' }} °C</span>
+                </td>
+                <td>{{ m.measurementDate }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="result__footer">
+        Pomiary trafią do bazy po przetworzeniu przez backend Java.
+        <a routerLink="/">Zobacz zapisane pomiary</a>
+      </p>
+    </section>
+  }
+</div>

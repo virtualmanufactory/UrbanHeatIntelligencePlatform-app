@@ -5,6 +5,7 @@ from datetime import date
 from typing import Optional
 
 from fastapi import Body, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from . import config
 from .gee_client import GeeClient
@@ -19,6 +20,14 @@ app = FastAPI(
     description="Fetches land-surface temperature from Google Earth Engine and "
     "publishes it to Kafka for the Java backend to persist.",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 gee_client = GeeClient()
