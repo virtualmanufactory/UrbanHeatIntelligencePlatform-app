@@ -30,4 +30,29 @@ describe('Ingest', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Dodaj pomiar miejscowości');
   });
+
+  it('should block coordinates outside Poland', () => {
+    const fixture = TestBed.createComponent(Ingest);
+    const httpMock = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+    httpMock.expectOne('http://localhost:8000/cities').flush([]);
+
+    const component = fixture.componentInstance as unknown as {
+      localityName: string;
+      latitude: { set: (value: number) => void };
+      longitude: { set: (value: number) => void };
+      onCoordinatesChange: () => void;
+      validationError: () => string | null;
+      canAddMeasurement: () => boolean;
+    };
+
+    component.localityName = 'Berlin';
+    component.latitude.set(52.52);
+    component.longitude.set(13.405);
+    component.onCoordinatesChange();
+    fixture.detectChanges();
+
+    expect(component.validationError()).toContain('Polska');
+    expect(component.canAddMeasurement()).toBeFalse();
+  });
 });

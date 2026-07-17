@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import config
 from .gee_client import GeeClient
 from .kafka_producer import HeatProducer
-from .models import IngestRequest, IngestResponse, Measurement, Point
+from .models import IngestRequest, IngestResponse, Measurement, Point, is_in_poland
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -60,6 +60,12 @@ def ingest(request: IngestRequest):
 
     measurements = []
     for point in points:
+        if not is_in_poland(point.latitude, point.longitude):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Miejscowość '{point.name}' leży poza granicami Polski.",
+            )
+
         temperature = gee_client.get_land_surface_temperature(
             point.latitude, point.longitude, measurement_date
         )
