@@ -1,11 +1,12 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { HeatMeasurement } from '../heat-measurement';
+import { HeatMap } from '../heat-map/heat-map';
 import { HeatService } from '../heat.service';
 
 @Component({
   selector: 'app-heat',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, HeatMap],
   templateUrl: './heat.html',
   styleUrl: './heat.scss',
 })

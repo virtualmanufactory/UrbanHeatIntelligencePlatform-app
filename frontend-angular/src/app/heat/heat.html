@@ -40,6 +40,15 @@
   } @else if (!error() && measurements().length === 0) {
     <div class="alert">Brak pomiarów w bazie danych.</div>
   } @else if (measurements().length > 0) {
+    <section class="map-section">
+      <h2 class="map-section__title">Mapa pomiarów</h2>
+      <app-heat-map [measurements]="measurements()" />
+      <p class="map-section__legend">
+        Kolor markera odzwierciedla temperaturę: chłodniejsze odcienie niebieskie, cieplejsze
+        pomarańczowe i czerwone.
+      </p>
+    </section>
+
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
