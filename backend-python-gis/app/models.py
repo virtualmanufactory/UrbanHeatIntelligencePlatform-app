@@ -16,8 +16,16 @@ def is_in_poland(latitude: float, longitude: float) -> bool:
 
 class Point(BaseModel):
     name: str = Field(..., min_length=1)
-    latitude: float = Field(..., ge=-90, le=90)
-    longitude: float = Field(..., ge=-180, le=180)
+    latitude: float = Field(
+        ...,
+        ge=config.POLAND_BOUNDS["minLatitude"],
+        le=config.POLAND_BOUNDS["maxLatitude"],
+    )
+    longitude: float = Field(
+        ...,
+        ge=config.POLAND_BOUNDS["minLongitude"],
+        le=config.POLAND_BOUNDS["maxLongitude"],
+    )
 
     @model_validator(mode="after")
     def validate_poland_bounds(self):

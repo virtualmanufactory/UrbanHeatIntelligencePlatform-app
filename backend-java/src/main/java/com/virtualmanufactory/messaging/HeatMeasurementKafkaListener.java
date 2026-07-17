@@ -3,6 +3,7 @@ package com.virtualmanufactory.messaging;
 import com.virtualmanufactory.dto.HeatMeasurementMessage;
 import com.virtualmanufactory.entity.HeatMeasurement;
 import com.virtualmanufactory.repository.HeatMeasurementRepository;
+import com.virtualmanufactory.util.PolandBounds;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,12 @@ public class HeatMeasurementKafkaListener {
 
 			if (message.getLatitude() == null || message.getLongitude() == null || message.getTemperature() == null) {
 				log.warn("Skipping invalid heat measurement (missing coordinates/temperature): {}", payload);
+				return;
+			}
+
+			if (!PolandBounds.isInPoland(message.getLatitude(), message.getLongitude())) {
+				log.warn("Skipping heat measurement outside Poland: lat={}, lon={}, payload={}",
+						message.getLatitude(), message.getLongitude(), payload);
 				return;
 			}
 

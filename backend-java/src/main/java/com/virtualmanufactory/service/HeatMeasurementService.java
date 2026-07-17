@@ -4,6 +4,7 @@ import com.virtualmanufactory.dto.HeatMeasurementDto;
 import com.virtualmanufactory.entity.HeatMeasurement;
 import com.virtualmanufactory.exception.ResourceNotFoundException;
 import com.virtualmanufactory.repository.HeatMeasurementRepository;
+import com.virtualmanufactory.util.PolandBounds;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class HeatMeasurementService {
 
 		return deduplicate(entities)
 				.stream()
+				.filter(entity -> PolandBounds.isInPoland(entity.getLatitude(), entity.getLongitude()))
 				.map(this::toDto)
 				.collect(Collectors.toList());
 	}
