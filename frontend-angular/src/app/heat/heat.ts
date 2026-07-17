@@ -80,9 +80,15 @@ export class Heat {
     });
   }
 
+  protected onSelectedDateChange(date: string | null): void {
+    this.selectedDate.set(date || null);
+    this.fetchByDate();
+  }
+
   protected fetchByDate(): void {
     const date = this.selectedDate();
     if (!date) {
+      this.measurements.set([]);
       this.error.set('Wybierz datę pomiaru.');
       return;
     }

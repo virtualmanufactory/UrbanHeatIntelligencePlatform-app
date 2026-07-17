@@ -76,4 +76,66 @@ describe('Heat', () => {
     expect(component.polishMeasurements().length).toBe(1);
     expect(component.polishMeasurements()[0].temperature).toBe(26.1);
   });
+
+  it('should refetch measurements when the selected date changes', () => {
+    const fixture = TestBed.createComponent(Heat);
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.expectOne('http://localhost:8080/api/heat').flush([
+      {
+        id: 1,
+        name: 'Warszawa',
+        latitude: 52.2297,
+        longitude: 21.0122,
+        temperature: 24.5,
+        measurementDate: '2026-06-27',
+      },
+      {
+        id: 2,
+        name: 'Kraków',
+        latitude: 50.0647,
+        longitude: 19.945,
+        temperature: 26.1,
+        measurementDate: '2026-07-01',
+      },
+    ]);
+    httpMock
+      .expectOne((req) => req.url.includes('/api/heat') && req.params.get('date') === '2026-07-01')
+      .flush([
+        {
+          id: 2,
+          name: 'Kraków',
+          latitude: 50.0647,
+          longitude: 19.945,
+          temperature: 26.1,
+          measurementDate: '2026-07-01',
+        },
+      ]);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      onSelectedDateChange: (date: string | null) => void;
+      selectedDate: () => string | null;
+      polishMeasurements: () => HeatMeasurement[];
+    };
+
+    component.onSelectedDateChange('2026-06-27');
+
+    httpMock
+      .expectOne((req) => req.url.includes('/api/heat') && req.params.get('date') === '2026-06-27')
+      .flush([
+        {
+          id: 1,
+          name: 'Warszawa',
+          latitude: 52.2297,
+          longitude: 21.0122,
+          temperature: 24.5,
+          measurementDate: '2026-06-27',
+        },
+      ]);
+    fixture.detectChanges();
+
+    expect(component.selectedDate()).toBe('2026-06-27');
+    expect(component.polishMeasurements().length).toBe(1);
+    expect(component.polishMeasurements()[0].name).toBe('Warszawa');
+  });
 });

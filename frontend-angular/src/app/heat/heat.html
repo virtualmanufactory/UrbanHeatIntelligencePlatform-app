@@ -48,12 +48,13 @@
               class="date-filter__input"
               type="date"
               [ngModel]="selectedDate()"
-              (ngModelChange)="selectedDate.set($event || null)"
+              (ngModelChange)="onSelectedDateChange($event || null)"
+              [disabled]="fetching() || loading()"
             />
           </label>
-          <button class="btn" (click)="fetchByDate()" [disabled]="fetching() || loading()">
-            {{ fetching() ? 'Pobieranie…' : 'Pobierz' }}
-          </button>
+          @if (fetching()) {
+            <span class="date-filter__status">Pobieranie…</span>
+          }
         </div>
       </div>
 
