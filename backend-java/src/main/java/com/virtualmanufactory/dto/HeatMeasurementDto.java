@@ -12,6 +12,10 @@ import java.time.LocalDate;
 @ToString(callSuper = true)
 public class HeatMeasurementDto {
 
+	private Long id;
+
+	private String name;
+
 	private Double latitude;
 
 	private Double longitude;

@@ -12,7 +12,11 @@ export class IngestService {
     return this.http.get<IngestPoint[]>(`${this.baseUrl}/cities`);
   }
 
-  ingest(request?: IngestRequest): Observable<IngestResponse> {
-    return this.http.post<IngestResponse>(`${this.baseUrl}/ingest`, request ?? {});
+  getVoivodeshipCapitals(): Observable<IngestPoint[]> {
+    return this.http.get<IngestPoint[]>(`${this.baseUrl}/voivodeship-capitals`);
+  }
+
+  ingest(request: IngestRequest): Observable<IngestResponse> {
+    return this.http.post<IngestResponse>(`${this.baseUrl}/ingest`, request);
   }
 }

@@ -7,7 +7,7 @@
         Zapisane pomiary miejscowości na terenie Polski
       </p>
     </div>
-    <button class="btn" (click)="load()" [disabled]="loading()">
+    <button class="btn" (click)="load()" [disabled]="loading() || fetching()">
       {{ loading() ? 'Ładowanie…' : 'Odśwież' }}
     </button>
   </header>
@@ -35,15 +35,13 @@
     <div class="alert alert--error">{{ error() }}</div>
   }
 
-  @if (loading() && polishMeasurements().length === 0) {
+  @if (loading() && allMeasurements().length === 0) {
     <div class="alert">Ładowanie danych…</div>
-  } @else if (!error() && polishMeasurements().length === 0) {
-    <div class="alert">Brak pomiarów dla miejscowości w Polsce.</div>
-  } @else if (polishMeasurements().length > 0) {
+  } @else {
     <section class="map-section">
       <div class="map-section__header">
         <h2 class="map-section__title">Mapa pomiarów w Polsce</h2>
-        @if (availableDates().length > 0) {
+        <div class="date-controls">
           <label class="date-filter">
             <span class="date-filter__label">Data pomiaru</span>
             <input
@@ -53,37 +51,57 @@
               (ngModelChange)="selectedDate.set($event || null)"
             />
           </label>
-        }
+          <button class="btn" (click)="fetchByDate()" [disabled]="fetching() || loading()">
+            {{ fetching() ? 'Pobieranie…' : 'Pobierz' }}
+          </button>
+        </div>
       </div>
 
-      @if (displayedMeasurements().length > 0) {
-        <app-heat-map [measurements]="displayedMeasurements()" />
+      @if (fetching() && polishMeasurements().length === 0) {
+        <div class="alert">Pobieranie pomiarów dla wybranej daty…</div>
+      } @else if (polishMeasurements().length > 0) {
+        <app-heat-map [measurements]="polishMeasurements()" />
       } @else {
         <div class="alert">Brak pomiarów dla wybranej daty.</div>
       }
     </section>
 
-    @if (displayedMeasurements().length > 0) {
+    @if (polishMeasurements().length > 0) {
       <div class="table-wrapper">
         <table class="data-table">
           <thead>
             <tr>
               <th>#</th>
+              <th>Miejscowość</th>
               <th>Data</th>
               <th>Szerokość geogr.</th>
               <th>Długość geogr.</th>
               <th>Temperatura</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            @for (m of displayedMeasurements(); track $index) {
+            @for (m of polishMeasurements(); track m.id ?? $index) {
               <tr>
                 <td>{{ $index + 1 }}</td>
+                <td>{{ m.name ?? '—' }}</td>
                 <td>{{ m.measurementDate ?? '—' }}</td>
                 <td>{{ m.latitude | number: '1.4-4' }}</td>
                 <td>{{ m.longitude | number: '1.4-4' }}</td>
                 <td>
                   <span class="temp-pill">{{ m.temperature | number: '1.1-1' }} °C</span>
+                </td>
+                <td>
+                  @if (m.id != null) {
+                    <button
+                      type="button"
+                      class="btn-delete"
+                      (click)="deleteMeasurement(m)"
+                      [disabled]="deletingId() === m.id"
+                    >
+                      {{ deletingId() === m.id ? 'Usuwanie…' : 'Usuń' }}
+                    </button>
+                  }
                 </td>
               </tr>
             }

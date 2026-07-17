@@ -15,6 +15,7 @@ import { isInPoland } from '../poland';
 export class Heat {
   private readonly heatService = inject(HeatService);
 
+  protected readonly allMeasurements = signal<HeatMeasurement[]>([]);
   protected readonly measurements = signal<HeatMeasurement[]>([]);
   protected readonly selectedDate = signal<string | null>(null);
   protected readonly polishMeasurements = computed(() =>
@@ -25,28 +26,21 @@ export class Heat {
   protected readonly availableDates = computed(() => {
     const dates = [
       ...new Set(
-        this.polishMeasurements()
+        this.allMeasurements()
           .map((measurement) => measurement.measurementDate)
           .filter((date): date is string => Boolean(date))
       ),
     ];
     return dates.sort().reverse();
   });
-  protected readonly displayedMeasurements = computed(() => {
-    const selectedDate = this.selectedDate();
-    if (!selectedDate) {
-      return this.polishMeasurements();
-    }
-    return this.polishMeasurements().filter(
-      (measurement) => measurement.measurementDate === selectedDate
-    );
-  });
   protected readonly loading = signal(false);
+  protected readonly fetching = signal(false);
+  protected readonly deletingId = signal<number | null>(null);
   protected readonly error = signal<string | null>(null);
 
-  protected readonly count = computed(() => this.displayedMeasurements().length);
+  protected readonly count = computed(() => this.polishMeasurements().length);
   protected readonly avgTemperature = computed(() => {
-    const list = this.displayedMeasurements();
+    const list = this.polishMeasurements();
     if (list.length === 0) {
       return null;
     }
@@ -54,7 +48,7 @@ export class Heat {
     return sum / list.length;
   });
   protected readonly maxTemperature = computed(() => {
-    const list = this.displayedMeasurements();
+    const list = this.polishMeasurements();
     if (list.length === 0) {
       return null;
     }
@@ -70,9 +64,10 @@ export class Heat {
     this.error.set(null);
     this.heatService.getAll().subscribe({
       next: (data) => {
-        this.measurements.set(data);
+        this.allMeasurements.set(data);
         this.syncSelectedDate(data);
         this.loading.set(false);
+        this.fetchByDate();
       },
       error: (err) => {
         this.error.set(
@@ -80,6 +75,48 @@ export class Heat {
             'Upewnij się, że backend jest uruchomiony.'
         );
         this.loading.set(false);
+        console.error(err);
+      },
+    });
+  }
+
+  protected fetchByDate(): void {
+    const date = this.selectedDate();
+    if (!date) {
+      this.error.set('Wybierz datę pomiaru.');
+      return;
+    }
+
+    this.fetching.set(true);
+    this.error.set(null);
+    this.heatService.getByDate(date).subscribe({
+      next: (data) => {
+        this.measurements.set(data);
+        this.fetching.set(false);
+      },
+      error: (err) => {
+        this.error.set('Nie udało się pobrać pomiarów dla wybranej daty.');
+        this.fetching.set(false);
+        console.error(err);
+      },
+    });
+  }
+
+  protected deleteMeasurement(measurement: HeatMeasurement): void {
+    if (measurement.id == null) {
+      return;
+    }
+
+    this.deletingId.set(measurement.id);
+    this.error.set(null);
+    this.heatService.delete(measurement.id).subscribe({
+      next: () => {
+        this.deletingId.set(null);
+        this.load();
+      },
+      error: (err) => {
+        this.error.set('Nie udało się usunąć pomiaru.');
+        this.deletingId.set(null);
         console.error(err);
       },
     });
@@ -98,7 +135,7 @@ export class Heat {
     ].sort().reverse();
 
     if (dates.length === 0) {
-      this.selectedDate.set(null);
+      this.selectedDate.set(new Date().toISOString().slice(0, 10));
       return;
     }
 

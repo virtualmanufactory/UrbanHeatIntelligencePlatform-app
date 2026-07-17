@@ -72,6 +72,16 @@
     </button>
   </section>
 
+  <section class="bulk-card">
+    <h2 class="bulk-card__title">Miasta wojewódzkie</h2>
+    <p class="bulk-card__hint">
+      Pobierz temperaturę dla wszystkich 16 stolic województw w wybranej dacie.
+    </p>
+    <button class="btn btn--secondary" (click)="ingestVoivodeshipCapitals()" [disabled]="ingesting()">
+      {{ ingesting() ? 'Pobieranie…' : 'Pobierz dla wszystkich miast wojewódzkich' }}
+    </button>
+  </section>
+
   @if (error()) {
     <div class="alert alert--error">{{ error() }}</div>
   }
