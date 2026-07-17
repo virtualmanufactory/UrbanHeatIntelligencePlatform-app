@@ -48,6 +48,11 @@ def cities():
     return config.POLISH_LOCALITIES
 
 
+@app.get("/voivodeship-capitals")
+def voivodeship_capitals():
+    return config.VOIVODESHIP_CAPITALS
+
+
 @app.post("/ingest", response_model=IngestResponse)
 def ingest(request: IngestRequest):
     points = request.points
@@ -59,6 +64,7 @@ def ingest(request: IngestRequest):
             point.latitude, point.longitude, measurement_date
         )
         message = {
+            "name": point.name,
             "latitude": point.latitude,
             "longitude": point.longitude,
             "temperature": temperature,

@@ -22,4 +22,6 @@ public class HeatMeasurementMessage {
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate measurementDate;
+
+	private String name;
 }

@@ -58,10 +58,6 @@ export class Ingest implements OnInit {
   }
 
   protected addMeasurement(): void {
-    this.validationError.set(null);
-    this.error.set(null);
-    this.result.set(null);
-
     const name = this.localityName.trim();
     if (!name) {
       this.validationError.set('Podaj nazwę miejscowości.');
@@ -78,17 +74,43 @@ export class Ingest implements OnInit {
       return;
     }
 
+    this.runIngest([
+      {
+        name,
+        latitude: this.latitude,
+        longitude: this.longitude,
+      },
+    ]);
+  }
+
+  protected ingestVoivodeshipCapitals(): void {
+    this.error.set(null);
+    this.validationError.set(null);
+    this.result.set(null);
+
+    this.ingestService.getVoivodeshipCapitals().subscribe({
+      next: (capitals) => {
+        this.runIngest(capitals);
+      },
+      error: (err) => {
+        this.error.set(
+          'Nie udało się pobrać listy miast wojewódzkich (http://localhost:8000/voivodeship-capitals).'
+        );
+        console.error(err);
+      },
+    });
+  }
+
+  private runIngest(points: IngestPoint[]): void {
+    this.validationError.set(null);
+    this.error.set(null);
+    this.result.set(null);
     this.ingesting.set(true);
+
     this.ingestService
       .ingest({
         date: this.measurementDate,
-        points: [
-          {
-            name,
-            latitude: this.latitude,
-            longitude: this.longitude,
-          },
-        ],
+        points,
       })
       .subscribe({
         next: (data) => {

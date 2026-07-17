@@ -1,3 +1,30 @@
+.bulk-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 14px;
+  padding: 1.2rem;
+  margin-bottom: 2rem;
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #f1f5f9;
+  }
+
+  &__hint {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.btn--secondary {
+  color: #fdba74;
+  background: rgba(249, 115, 22, 0.15);
+  border: 1px solid rgba(251, 146, 60, 0.35);
+  box-shadow: none;
+}
+
 .form-card {
   background: rgba(30, 41, 59, 0.7);
   border: 1px solid rgba(148, 163, 184, 0.15);

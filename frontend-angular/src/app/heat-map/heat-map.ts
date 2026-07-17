@@ -146,7 +146,8 @@ export class HeatMap implements AfterViewInit, OnDestroy {
       });
 
       marker.bindPopup(
-        `<strong>${measurement.temperature.toFixed(1)} °C</strong><br>` +
+        `<strong>${measurement.name ?? 'Pomiar'}</strong><br>` +
+          `<strong>${measurement.temperature.toFixed(1)} °C</strong><br>` +
           `${measurement.latitude.toFixed(4)}, ${measurement.longitude.toFixed(4)}` +
           (measurement.measurementDate ? `<br>${measurement.measurementDate}` : '')
       );
