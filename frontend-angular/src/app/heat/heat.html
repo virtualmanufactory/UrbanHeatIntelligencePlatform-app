@@ -46,15 +46,12 @@
         @if (availableDates().length > 0) {
           <label class="date-filter">
             <span class="date-filter__label">Data pomiaru</span>
-            <select
-              class="date-filter__select"
-              [value]="selectedDate() ?? ''"
-              (change)="onDateChange($event)"
-            >
-              @for (date of availableDates(); track date) {
-                <option [value]="date">{{ date }}</option>
-              }
-            </select>
+            <input
+              class="date-filter__input"
+              type="date"
+              [ngModel]="selectedDate()"
+              (ngModelChange)="selectedDate.set($event || null)"
+            />
           </label>
         }
       </div>

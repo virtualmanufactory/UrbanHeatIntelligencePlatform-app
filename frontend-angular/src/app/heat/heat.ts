@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { HeatMeasurement } from '../heat-measurement';
 import { HeatMap } from '../heat-map/heat-map';
 import { HeatService } from '../heat.service';
@@ -7,7 +8,7 @@ import { isInPoland } from '../poland';
 
 @Component({
   selector: 'app-heat',
-  imports: [DecimalPipe, HeatMap],
+  imports: [DecimalPipe, FormsModule, HeatMap],
   templateUrl: './heat.html',
   styleUrl: './heat.scss',
 })
@@ -62,11 +63,6 @@ export class Heat {
 
   constructor() {
     this.load();
-  }
-
-  protected onDateChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedDate.set(value || null);
   }
 
   protected load(): void {
