@@ -1,8 +1,10 @@
+import { DecimalPipe } from '@angular/common';
 import {
   AfterViewInit,
   Component,
   ElementRef,
   OnDestroy,
+  computed,
   effect,
   input,
   viewChild,
@@ -10,7 +12,7 @@ import {
 import * as L from 'leaflet';
 import { HeatMeasurement } from '../heat-measurement';
 
-function temperatureColor(temperature: number, min: number, max: number): string {
+export function temperatureColor(temperature: number, min: number, max: number): string {
   if (max === min) {
     return '#f97316';
   }
@@ -19,13 +21,45 @@ function temperatureColor(temperature: number, min: number, max: number): string
   return `hsl(${hue}, 85%, 50%)`;
 }
 
+export function temperatureLegendGradient(min: number, max: number): string {
+  if (max === min) {
+    const color = temperatureColor(min, min, max);
+    return `linear-gradient(to right, ${color}, ${color})`;
+  }
+  return `linear-gradient(to right, ${temperatureColor(min, min, max)}, ${temperatureColor(max, min, max)})`;
+}
+
 @Component({
   selector: 'app-heat-map',
-  template: '<div class="heat-map" #mapContainer></div>',
+  imports: [DecimalPipe],
+  templateUrl: './heat-map.html',
   styleUrl: './heat-map.scss',
 })
 export class HeatMap implements AfterViewInit, OnDestroy {
   readonly measurements = input<HeatMeasurement[]>([]);
+
+  protected readonly minTemp = computed(() => {
+    const temps = this.measurements().map((m) => m.temperature);
+    return temps.length > 0 ? Math.min(...temps) : null;
+  });
+
+  protected readonly maxTemp = computed(() => {
+    const temps = this.measurements().map((m) => m.temperature);
+    return temps.length > 0 ? Math.max(...temps) : null;
+  });
+
+  protected readonly hasLegend = computed(
+    () => this.minTemp() !== null && this.maxTemp() !== null
+  );
+
+  protected readonly legendGradient = computed(() => {
+    const min = this.minTemp();
+    const max = this.maxTemp();
+    if (min === null || max === null) {
+      return '';
+    }
+    return temperatureLegendGradient(min, max);
+  });
 
   private readonly mapContainer = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map?: L.Map;

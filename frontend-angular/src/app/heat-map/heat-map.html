@@ -1,0 +1,18 @@
+<div class="heat-map-wrapper">
+  <div class="heat-map" #mapContainer></div>
+
+  @if (hasLegend()) {
+    <div class="color-legend" aria-label="Legenda kolorów temperatury">
+      <span class="color-legend__title">Temperatura</span>
+      <div class="color-legend__bar" [style.background]="legendGradient()"></div>
+      <div class="color-legend__values">
+        <span>{{ minTemp() | number: '1.1-1' }} °C</span>
+        <span>{{ maxTemp() | number: '1.1-1' }} °C</span>
+      </div>
+      <div class="color-legend__labels">
+        <span>Chłodniej</span>
+        <span>Cieplej</span>
+      </div>
+    </div>
+  }
+</div>
