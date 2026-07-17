@@ -41,33 +41,58 @@
     <div class="alert">Brak pomiarów dla miejscowości w Polsce.</div>
   } @else if (polishMeasurements().length > 0) {
     <section class="map-section">
-      <h2 class="map-section__title">Mapa pomiarów w Polsce</h2>
-      <app-heat-map [measurements]="polishMeasurements()" />
+      <div class="map-section__header">
+        <h2 class="map-section__title">Mapa pomiarów w Polsce</h2>
+        @if (availableDates().length > 0) {
+          <label class="date-filter">
+            <span class="date-filter__label">Data pomiaru</span>
+            <select
+              class="date-filter__select"
+              [value]="selectedDate() ?? ''"
+              (change)="onDateChange($event)"
+            >
+              @for (date of availableDates(); track date) {
+                <option [value]="date">{{ date }}</option>
+              }
+            </select>
+          </label>
+        }
+      </div>
+
+      @if (displayedMeasurements().length > 0) {
+        <app-heat-map [measurements]="displayedMeasurements()" />
+      } @else {
+        <div class="alert">Brak pomiarów dla wybranej daty.</div>
+      }
     </section>
 
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Szerokość geogr.</th>
-            <th>Długość geogr.</th>
-            <th>Temperatura</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (m of polishMeasurements(); track $index) {
+    @if (displayedMeasurements().length > 0) {
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
             <tr>
-              <td>{{ $index + 1 }}</td>
-              <td>{{ m.latitude | number: '1.4-4' }}</td>
-              <td>{{ m.longitude | number: '1.4-4' }}</td>
-              <td>
-                <span class="temp-pill">{{ m.temperature | number: '1.1-1' }} °C</span>
-              </td>
+              <th>#</th>
+              <th>Data</th>
+              <th>Szerokość geogr.</th>
+              <th>Długość geogr.</th>
+              <th>Temperatura</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (m of displayedMeasurements(); track $index) {
+              <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ m.measurementDate ?? '—' }}</td>
+                <td>{{ m.latitude | number: '1.4-4' }}</td>
+                <td>{{ m.longitude | number: '1.4-4' }}</td>
+                <td>
+                  <span class="temp-pill">{{ m.temperature | number: '1.1-1' }} °C</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
 </div>

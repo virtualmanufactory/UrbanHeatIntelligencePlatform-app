@@ -15,17 +15,37 @@ export class Heat {
   private readonly heatService = inject(HeatService);
 
   protected readonly measurements = signal<HeatMeasurement[]>([]);
+  protected readonly selectedDate = signal<string | null>(null);
   protected readonly polishMeasurements = computed(() =>
     this.measurements().filter((measurement) =>
       isInPoland(measurement.latitude, measurement.longitude)
     )
   );
+  protected readonly availableDates = computed(() => {
+    const dates = [
+      ...new Set(
+        this.polishMeasurements()
+          .map((measurement) => measurement.measurementDate)
+          .filter((date): date is string => Boolean(date))
+      ),
+    ];
+    return dates.sort().reverse();
+  });
+  protected readonly displayedMeasurements = computed(() => {
+    const selectedDate = this.selectedDate();
+    if (!selectedDate) {
+      return this.polishMeasurements();
+    }
+    return this.polishMeasurements().filter(
+      (measurement) => measurement.measurementDate === selectedDate
+    );
+  });
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  protected readonly count = computed(() => this.polishMeasurements().length);
+  protected readonly count = computed(() => this.displayedMeasurements().length);
   protected readonly avgTemperature = computed(() => {
-    const list = this.polishMeasurements();
+    const list = this.displayedMeasurements();
     if (list.length === 0) {
       return null;
     }
@@ -33,7 +53,7 @@ export class Heat {
     return sum / list.length;
   });
   protected readonly maxTemperature = computed(() => {
-    const list = this.polishMeasurements();
+    const list = this.displayedMeasurements();
     if (list.length === 0) {
       return null;
     }
@@ -44,12 +64,18 @@ export class Heat {
     this.load();
   }
 
+  protected onDateChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedDate.set(value || null);
+  }
+
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);
     this.heatService.getAll().subscribe({
       next: (data) => {
         this.measurements.set(data);
+        this.syncSelectedDate(data);
         this.loading.set(false);
       },
       error: (err) => {
@@ -61,5 +87,28 @@ export class Heat {
         console.error(err);
       },
     });
+  }
+
+  private syncSelectedDate(measurements: HeatMeasurement[]): void {
+    const dates = [
+      ...new Set(
+        measurements
+          .filter((measurement) =>
+            isInPoland(measurement.latitude, measurement.longitude)
+          )
+          .map((measurement) => measurement.measurementDate)
+          .filter((date): date is string => Boolean(date))
+      ),
+    ].sort().reverse();
+
+    if (dates.length === 0) {
+      this.selectedDate.set(null);
+      return;
+    }
+
+    const currentDate = this.selectedDate();
+    if (!currentDate || !dates.includes(currentDate)) {
+      this.selectedDate.set(dates[0]);
+    }
   }
 }
