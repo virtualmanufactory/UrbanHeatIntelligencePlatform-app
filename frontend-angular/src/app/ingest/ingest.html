@@ -2,66 +2,104 @@
   <header class="hero">
     <div class="hero__content">
       <span class="hero__badge">Urban Heat Intelligence Platform</span>
-      <h1 class="hero__title">Ingest pomiarów</h1>
+      <h1 class="hero__title">Dodaj pomiar miejscowości</h1>
       <p class="hero__subtitle">
-        Pobierz temperaturę z Google Earth Engine &mdash;
-        <code>POST /ingest</code>
+        Wprowadź polską miejscowość i pobierz dla niej temperaturę z Google Earth Engine
       </p>
     </div>
-    <button class="btn" (click)="runIngest()" [disabled]="ingesting()">
-      {{ ingesting() ? 'Ingest w toku…' : 'Uruchom ingest' }}
-    </button>
   </header>
 
   <section class="form-card">
-    <label class="form-card__label" for="measurement-date">Data pomiaru</label>
-    <input
-      id="measurement-date"
-      class="form-card__input"
-      type="date"
-      [(ngModel)]="measurementDate"
-      [disabled]="ingesting()"
-    />
+    <h2 class="form-card__title">Nowa miejscowość</h2>
+
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-field__label">Nazwa miejscowości</span>
+        <input
+          class="form-field__input"
+          type="text"
+          [(ngModel)]="localityName"
+          [disabled]="ingesting()"
+          placeholder="np. Warszawa"
+        />
+      </label>
+
+      <label class="form-field">
+        <span class="form-field__label">Szerokość geogr.</span>
+        <input
+          class="form-field__input"
+          type="number"
+          step="0.0001"
+          [(ngModel)]="latitude"
+          [disabled]="ingesting()"
+          placeholder="49.0 – 54.9"
+        />
+      </label>
+
+      <label class="form-field">
+        <span class="form-field__label">Długość geogr.</span>
+        <input
+          class="form-field__input"
+          type="number"
+          step="0.0001"
+          [(ngModel)]="longitude"
+          [disabled]="ingesting()"
+          placeholder="14.1 – 24.2"
+        />
+      </label>
+
+      <label class="form-field">
+        <span class="form-field__label">Data pomiaru</span>
+        <input
+          class="form-field__input"
+          type="date"
+          [(ngModel)]="measurementDate"
+          [disabled]="ingesting()"
+        />
+      </label>
+    </div>
+
     <p class="form-card__hint">
-      Bez własnych punktów ingest użyje domyślnych miast poniżej.
+      Akceptowane są wyłącznie miejscowości położone na terenie Polski.
     </p>
+
+    @if (validationError()) {
+      <div class="alert alert--error form-card__alert">{{ validationError() }}</div>
+    }
+
+    <button class="btn" (click)="addMeasurement()" [disabled]="ingesting()">
+      {{ ingesting() ? 'Dodawanie…' : 'Dodaj pomiar' }}
+    </button>
   </section>
 
   @if (error()) {
     <div class="alert alert--error">{{ error() }}</div>
   }
 
-  @if (loadingCities()) {
-    <div class="alert">Ładowanie domyślnych miast…</div>
-  } @else if (cities().length > 0) {
-    <section class="cities">
-      <h2 class="cities__title">Domyślne miasta</h2>
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Miasto</th>
-              <th>Szerokość geogr.</th>
-              <th>Długość geogr.</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (city of cities(); track city.name) {
-              <tr>
-                <td>{{ city.name }}</td>
-                <td>{{ city.latitude | number: '1.4-4' }}</td>
-                <td>{{ city.longitude | number: '1.4-4' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+  @if (loadingSuggestions()) {
+    <div class="alert">Ładowanie przykładowych miejscowości…</div>
+  } @else if (suggestions().length > 0) {
+    <section class="suggestions">
+      <h2 class="suggestions__title">Przykładowe miejscowości</h2>
+      <p class="suggestions__hint">Kliknij miejscowość, aby wypełnić formularz.</p>
+      <div class="suggestions__list">
+        @for (locality of suggestions(); track locality.name) {
+          <button
+            type="button"
+            class="suggestion-chip"
+            (click)="useSuggestion(locality)"
+            [disabled]="ingesting()"
+          >
+            {{ locality.name }}
+          </button>
+        }
       </div>
     </section>
   }
 
   @if (result()) {
     <section class="result">
-      <h2 class="result__title">Wynik ingestu</h2>
+      <h2 class="result__title">Dodano pomiar</h2>
       <div class="stats">
         <div class="stat-card">
           <span class="stat-card__label">Tryb GEE</span>
@@ -81,7 +119,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Miasto</th>
+              <th>Miejscowość</th>
               <th>Szerokość geogr.</th>
               <th>Długość geogr.</th>
               <th>Temperatura</th>
@@ -105,8 +143,8 @@
       </div>
 
       <p class="result__footer">
-        Pomiary trafią do bazy po przetworzeniu przez backend Java.
-        <a routerLink="/">Zobacz zapisane pomiary</a>
+        Pomiar trafi do bazy po przetworzeniu przez backend Java.
+        <a routerLink="/">Zobacz mapę pomiarów w Polsce</a>
       </p>
     </section>
   }

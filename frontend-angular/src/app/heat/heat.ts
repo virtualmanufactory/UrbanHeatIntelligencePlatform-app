@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { HeatMeasurement } from '../heat-measurement';
 import { HeatMap } from '../heat-map/heat-map';
 import { HeatService } from '../heat.service';
+import { isInPoland } from '../poland';
 
 @Component({
   selector: 'app-heat',
@@ -14,12 +15,17 @@ export class Heat {
   private readonly heatService = inject(HeatService);
 
   protected readonly measurements = signal<HeatMeasurement[]>([]);
+  protected readonly polishMeasurements = computed(() =>
+    this.measurements().filter((measurement) =>
+      isInPoland(measurement.latitude, measurement.longitude)
+    )
+  );
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  protected readonly count = computed(() => this.measurements().length);
+  protected readonly count = computed(() => this.polishMeasurements().length);
   protected readonly avgTemperature = computed(() => {
-    const list = this.measurements();
+    const list = this.polishMeasurements();
     if (list.length === 0) {
       return null;
     }
@@ -27,7 +33,7 @@ export class Heat {
     return sum / list.length;
   });
   protected readonly maxTemperature = computed(() => {
-    const list = this.measurements();
+    const list = this.polishMeasurements();
     if (list.length === 0) {
       return null;
     }

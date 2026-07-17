@@ -28,6 +28,6 @@ describe('Ingest', () => {
     httpMock.expectOne('http://localhost:8000/cities').flush([]);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Ingest pomiarów');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Dodaj pomiar miejscowości');
   });
 });

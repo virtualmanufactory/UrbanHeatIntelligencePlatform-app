@@ -1,5 +1,5 @@
 export interface IngestPoint {
-  name?: string;
+  name: string;
   latitude: number;
   longitude: number;
 }

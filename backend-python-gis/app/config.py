@@ -20,12 +20,28 @@ GEE_SERVICE_ACCOUNT_KEY_FILE = (
 GEE_LST_COLLECTION = os.getenv("GEE_LST_COLLECTION", "MODIS/061/MOD11A1")
 GEE_LST_BAND = os.getenv("GEE_LST_BAND", "LST_Day_1km")
 
-# Sample cities used when an ingest request does not specify its own points.
-DEFAULT_CITIES = [
-    {"name": "New York", "latitude": 40.7128, "longitude": -74.0060},
-    {"name": "London", "latitude": 51.5074, "longitude": -0.1278},
-    {"name": "Paris", "latitude": 48.8566, "longitude": 2.3522},
-    {"name": "Tokyo", "latitude": 35.6895, "longitude": 139.6917},
-    {"name": "Cairo", "latitude": 30.0444, "longitude": 31.2357},
-    {"name": "Warsaw", "latitude": 52.2297, "longitude": 21.0122},
+# Approximate geographic bounds of Poland.
+POLAND_BOUNDS = {
+    "minLatitude": 49.0,
+    "maxLatitude": 54.9,
+    "minLongitude": 14.1,
+    "maxLongitude": 24.2,
+}
+
+# Example Polish localities offered as suggestions on the ingest form.
+POLISH_LOCALITIES = [
+    {"name": "Warszawa", "latitude": 52.2297, "longitude": 21.0122},
+    {"name": "Kraków", "latitude": 50.0647, "longitude": 19.9450},
+    {"name": "Gdańsk", "latitude": 54.3520, "longitude": 18.6466},
+    {"name": "Wrocław", "latitude": 51.1079, "longitude": 17.0385},
+    {"name": "Poznań", "latitude": 52.4064, "longitude": 16.9252},
+    {"name": "Łódź", "latitude": 51.7592, "longitude": 19.4560},
+    {"name": "Szczecin", "latitude": 53.4285, "longitude": 14.5528},
+    {"name": "Lublin", "latitude": 51.2465, "longitude": 22.5684},
+    {"name": "Białystok", "latitude": 53.1325, "longitude": 23.1688},
+    {"name": "Katowice", "latitude": 50.2649, "longitude": 19.0238},
+    {"name": "Rzeszów", "latitude": 50.0412, "longitude": 21.9991},
 ]
+
+# Backwards-compatible alias used by older code paths.
+DEFAULT_CITIES = POLISH_LOCALITIES
