@@ -60,9 +60,11 @@
 
       @if (fetching() && polishMeasurements().length === 0) {
         <div class="alert">Pobieranie pomiarów dla wybranej daty…</div>
-      } @else if (polishMeasurements().length > 0) {
-        <app-heat-map [measurements]="polishMeasurements()" />
-      } @else {
+      }
+
+      <app-heat-map [measurements]="polishMeasurements()" />
+
+      @if (!fetching() && polishMeasurements().length === 0) {
         <div class="alert">Brak pomiarów dla wybranej daty.</div>
       }
     </section>

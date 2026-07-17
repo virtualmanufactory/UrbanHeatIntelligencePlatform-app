@@ -7,6 +7,7 @@ import {
   computed,
   effect,
   input,
+  signal,
   viewChild,
 } from '@angular/core';
 import * as L from 'leaflet';
@@ -70,26 +71,31 @@ export class HeatMap implements AfterViewInit, OnDestroy {
   private readonly mapContainer = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map?: L.Map;
   private layerGroup?: L.LayerGroup;
-  private viewReady = false;
+  private readonly viewReady = signal(false);
 
   constructor() {
     effect(() => {
-      if (!this.viewReady) {
+      // Always read measurements so the effect re-runs when the input changes.
+      // Previously an early return on a plain boolean skipped this read, so markers
+      // rendered once and never updated after date changes.
+      const measurements = this.measurements();
+      if (!this.viewReady()) {
         return;
       }
-      this.renderMarkers(this.measurements());
+      this.renderMarkers(measurements);
     });
   }
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.viewReady = true;
-    this.renderMarkers(this.measurements());
+    this.viewReady.set(true);
   }
 
   ngOnDestroy(): void {
+    this.viewReady.set(false);
     this.map?.remove();
     this.map = undefined;
+    this.layerGroup = undefined;
   }
 
   private initMap(): void {
@@ -155,6 +161,7 @@ export class HeatMap implements AfterViewInit, OnDestroy {
       marker.addTo(this.layerGroup);
     }
 
+    this.map.invalidateSize();
     this.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 8 });
   }
 }
