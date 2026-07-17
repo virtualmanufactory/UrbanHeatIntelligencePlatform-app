@@ -1,9 +1,41 @@
 .map-section {
   margin-bottom: 2rem;
 
+  &__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
   &__title {
-    margin: 0 0 1rem;
+    margin: 0;
     font-size: 1.1rem;
     color: #f1f5f9;
+  }
+}
+
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  &__label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__select {
+    min-width: 170px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 10px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    color: #f1f5f9;
+    background: rgba(15, 23, 42, 0.8);
   }
 }

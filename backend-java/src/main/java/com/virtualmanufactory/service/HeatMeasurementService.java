@@ -21,6 +21,7 @@ public class HeatMeasurementService {
 						.latitude(entity.getLatitude())
 						.longitude(entity.getLongitude())
 						.temperature(entity.getTemperature())
+						.measurementDate(entity.getMeasurementDate())
 						.build())
 				.collect(Collectors.toList());
 	}
