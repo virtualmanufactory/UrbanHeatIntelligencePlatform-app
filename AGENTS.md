@@ -71,7 +71,7 @@ From `backend-python-gis/` (the update script creates `.venv` and installs requi
 
 > The Kafka producer (`app/kafka_producer.py`) imports `confluent_kafka` (the librdkafka-backed client), which is pinned in `requirements.txt`. `kafka-python` is also listed but unused. If you reinstall deps while `uvicorn --reload` is running, the reloader can stay crashed on a stale `ModuleNotFoundError`; stop and restart the uvicorn process.
 
-- Run (dev): `.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` — serves on port `8000` (Swagger UI at `/docs`).
+- Run (dev): `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`, `.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` — serves on port `8000` (Swagger UI at `/docs`).
 - Trigger ingestion: `curl -X POST http://localhost:8000/ingest` (optional JSON body `{ "date": "YYYY-MM-DD", "points": [...] }`).
 
 Google Earth Engine auth is optional. Without `GEE_PROJECT` + service-account credentials (`GEE_SERVICE_ACCOUNT` / `GEE_SERVICE_ACCOUNT_KEY_FILE`), the service runs in deterministic **mock** mode (still produces to Kafka). `GET /health` reports the active mode (`earth-engine` vs `mock`).
