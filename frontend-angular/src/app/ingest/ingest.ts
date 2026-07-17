@@ -23,7 +23,7 @@ export class Ingest implements OnInit {
   protected readonly validationError = signal<string | null>(null);
   protected readonly result = signal<IngestResponse | null>(null);
 
-  protected localityName = '';
+  protected readonly localityName = signal('');
   protected readonly latitude = signal<number | null>(null);
   protected readonly longitude = signal<number | null>(null);
   protected measurementDate = new Date().toISOString().slice(0, 10);
@@ -44,7 +44,7 @@ export class Ingest implements OnInit {
   protected readonly canAddMeasurement = computed(
     () =>
       !this.ingesting() &&
-      this.localityName.trim().length > 0 &&
+      this.localityName().trim().length > 0 &&
       this.hasCoordinates() &&
       this.coordinatesInPoland() === true
   );
@@ -73,7 +73,7 @@ export class Ingest implements OnInit {
   }
 
   protected useSuggestion(locality: IngestPoint): void {
-    this.localityName = locality.name;
+    this.localityName.set(locality.name);
     this.latitude.set(locality.latitude);
     this.longitude.set(locality.longitude);
     this.validationError.set(null);
@@ -99,7 +99,7 @@ export class Ingest implements OnInit {
   }
 
   protected addMeasurement(): void {
-    const name = this.localityName.trim();
+    const name = this.localityName().trim();
     if (!name) {
       this.validationError.set('Podaj nazwę miejscowości.');
       return;

@@ -38,7 +38,7 @@ describe('Ingest', () => {
     httpMock.expectOne('http://localhost:8000/cities').flush([]);
 
     const component = fixture.componentInstance as unknown as {
-      localityName: string;
+      localityName: { set: (value: string) => void };
       latitude: { set: (value: number) => void };
       longitude: { set: (value: number) => void };
       onCoordinatesChange: () => void;
@@ -46,7 +46,7 @@ describe('Ingest', () => {
       canAddMeasurement: () => boolean;
     };
 
-    component.localityName = 'Berlin';
+    component.localityName.set('Berlin');
     component.latitude.set(52.52);
     component.longitude.set(13.405);
     component.onCoordinatesChange();
@@ -54,5 +54,35 @@ describe('Ingest', () => {
 
     expect(component.validationError()).toContain('Polska');
     expect(component.canAddMeasurement()).toBeFalse();
+  });
+
+  it('should enable the add button after filling name and Polish coordinates', () => {
+    const fixture = TestBed.createComponent(Ingest);
+    const httpMock = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+    httpMock.expectOne('http://localhost:8000/cities').flush([]);
+
+    const component = fixture.componentInstance as unknown as {
+      localityName: { set: (value: string) => void };
+      latitude: { set: (value: number) => void };
+      longitude: { set: (value: number) => void };
+      canAddMeasurement: () => boolean;
+    };
+
+    // Coordinates first, then name — previously left the button stuck disabled
+    // because localityName was a plain field and canAddMeasurement is computed.
+    component.latitude.set(52.2297);
+    component.longitude.set(21.0122);
+    fixture.detectChanges();
+    expect(component.canAddMeasurement()).toBeFalse();
+
+    component.localityName.set('Warszawa');
+    fixture.detectChanges();
+
+    expect(component.canAddMeasurement()).toBeTrue();
+    const button = (fixture.nativeElement as HTMLElement).querySelector(
+      'button.btn'
+    ) as HTMLButtonElement;
+    expect(button.disabled).toBeFalse();
   });
 });

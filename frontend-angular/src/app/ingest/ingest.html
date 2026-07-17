@@ -18,7 +18,8 @@
         <input
           class="form-field__input"
           type="text"
-          [(ngModel)]="localityName"
+          [ngModel]="localityName()"
+          (ngModelChange)="localityName.set($event)"
           [disabled]="ingesting()"
           placeholder="np. Warszawa"
         />
