@@ -2,9 +2,9 @@
   <header class="hero">
     <div class="hero__content">
       <span class="hero__badge">Urban Heat Intelligence Platform</span>
-      <h1 class="hero__title">Pomiary temperatury miejskiej</h1>
+      <h1 class="hero__title">Pomiary temperatury w Polsce</h1>
       <p class="hero__subtitle">
-        Zapisane Temperatury &mdash;
+        Zapisane pomiary miejscowości na terenie Polski
       </p>
     </div>
     <button class="btn" (click)="load()" [disabled]="loading()">
@@ -35,14 +35,14 @@
     <div class="alert alert--error">{{ error() }}</div>
   }
 
-  @if (loading() && measurements().length === 0) {
+  @if (loading() && polishMeasurements().length === 0) {
     <div class="alert">Ładowanie danych…</div>
-  } @else if (!error() && measurements().length === 0) {
-    <div class="alert">Brak pomiarów w bazie danych.</div>
-  } @else if (measurements().length > 0) {
+  } @else if (!error() && polishMeasurements().length === 0) {
+    <div class="alert">Brak pomiarów dla miejscowości w Polsce.</div>
+  } @else if (polishMeasurements().length > 0) {
     <section class="map-section">
-      <h2 class="map-section__title">Mapa pomiarów</h2>
-      <app-heat-map [measurements]="measurements()" />
+      <h2 class="map-section__title">Mapa pomiarów w Polsce</h2>
+      <app-heat-map [measurements]="polishMeasurements()" />
     </section>
 
     <div class="table-wrapper">
@@ -56,7 +56,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (m of measurements(); track $index) {
+          @for (m of polishMeasurements(); track $index) {
             <tr>
               <td>{{ $index + 1 }}</td>
               <td>{{ m.latitude | number: '1.4-4' }}</td>

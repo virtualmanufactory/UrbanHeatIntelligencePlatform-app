@@ -24,6 +24,6 @@ describe('App', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.nav__brand')?.textContent).toContain('Urban Heat');
-    expect(compiled.textContent).toContain('Ingest');
+    expect(compiled.textContent).toContain('Dodaj miejscowość');
   });
 });

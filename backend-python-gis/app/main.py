@@ -2,9 +2,8 @@
 streams it to Kafka, where backend-java consumes and persists it."""
 import logging
 from datetime import date
-from typing import Optional
 
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config
@@ -46,18 +45,12 @@ def health():
 
 @app.get("/cities")
 def cities():
-    return config.DEFAULT_CITIES
+    return config.POLISH_LOCALITIES
 
 
 @app.post("/ingest", response_model=IngestResponse)
-def ingest(request: Optional[IngestRequest] = Body(default=None)):
-    request = request or IngestRequest()
-
-    if request.points:
-        points = request.points
-    else:
-        points = [Point(**city) for city in config.DEFAULT_CITIES]
-
+def ingest(request: IngestRequest):
+    points = request.points
     measurement_date = request.date or date.today().isoformat()
 
     measurements = []

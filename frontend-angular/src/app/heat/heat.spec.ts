@@ -25,6 +25,6 @@ describe('Heat', () => {
     httpMock.expectOne('http://localhost:8080/api/heat').flush([]);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Pomiary temperatury miejskiej');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Pomiary temperatury w Polsce');
   });
 });

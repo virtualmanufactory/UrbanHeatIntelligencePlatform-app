@@ -11,6 +11,12 @@ import {
 } from '@angular/core';
 import * as L from 'leaflet';
 import { HeatMeasurement } from '../heat-measurement';
+import {
+  getPolandLeafletBounds,
+  isInPoland,
+  POLAND_MAP_CENTER,
+  POLAND_MAP_ZOOM,
+} from '../poland';
 
 export function temperatureColor(temperature: number, min: number, max: number): string {
   if (max === min) {
@@ -88,10 +94,14 @@ export class HeatMap implements AfterViewInit, OnDestroy {
 
   private initMap(): void {
     const container = this.mapContainer().nativeElement;
+    const polandBounds = L.latLngBounds(getPolandLeafletBounds());
     this.map = L.map(container, {
-      center: [30, 10],
-      zoom: 2,
+      center: POLAND_MAP_CENTER,
+      zoom: POLAND_MAP_ZOOM,
       scrollWheelZoom: true,
+      maxBounds: polandBounds,
+      maxBoundsViscosity: 1.0,
+      minZoom: 5,
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -109,17 +119,21 @@ export class HeatMap implements AfterViewInit, OnDestroy {
 
     this.layerGroup.clearLayers();
 
-    if (measurements.length === 0) {
-      this.map.setView([30, 10], 2);
+    const polishMeasurements = measurements.filter((measurement) =>
+      isInPoland(measurement.latitude, measurement.longitude)
+    );
+
+    if (polishMeasurements.length === 0) {
+      this.map.setView(POLAND_MAP_CENTER, POLAND_MAP_ZOOM);
       return;
     }
 
-    const temperatures = measurements.map((m) => m.temperature);
+    const temperatures = polishMeasurements.map((m) => m.temperature);
     const minTemp = Math.min(...temperatures);
     const maxTemp = Math.max(...temperatures);
     const bounds = L.latLngBounds([]);
 
-    for (const measurement of measurements) {
+    for (const measurement of polishMeasurements) {
       const position: L.LatLngExpression = [measurement.latitude, measurement.longitude];
       bounds.extend(position);
 
