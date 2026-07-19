@@ -1,15 +1,37 @@
 <nav class="nav">
   <a class="nav__brand" routerLink="/">Urban Heat</a>
-  <div class="nav__links">
-    <a routerLink="/" routerLinkActive="nav__link--active" [routerLinkActiveOptions]="{ exact: true }">
-      Pomiary
-    </a>
-    <a routerLink="/ingest" routerLinkActive="nav__link--active">Dodaj pomiar dla miejscowości</a>
+  <div class="nav__controls">
+    <div class="nav__links">
+      <a routerLink="/" routerLinkActive="nav__link--active" [routerLinkActiveOptions]="{ exact: true }">
+        {{ 'nav.measurements' | t }}
+      </a>
+      <a routerLink="/ingest" routerLinkActive="nav__link--active">
+        {{ 'nav.addMeasurement' | t }}
+      </a>
+    </div>
+    <div class="lang-switch" role="group" [attr.aria-label]="'nav.language' | t">
+      <button
+        type="button"
+        class="lang-switch__btn"
+        [class.lang-switch__btn--active]="i18n.language() === 'pl'"
+        (click)="setLanguage('pl')"
+      >
+        {{ 'nav.languagePl' | t }}
+      </button>
+      <button
+        type="button"
+        class="lang-switch__btn"
+        [class.lang-switch__btn--active]="i18n.language() === 'en'"
+        (click)="setLanguage('en')"
+      >
+        {{ 'nav.languageEn' | t }}
+      </button>
+    </div>
   </div>
 </nav>
 
 <router-outlet />
 
 <footer class="footer">
-  Angular frontend &middot; Java API :8080 &middot; GIS ingest :8000
+  {{ 'footer' | t }}
 </footer>

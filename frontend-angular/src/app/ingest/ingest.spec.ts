@@ -3,13 +3,16 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { Ingest } from './ingest';
+import { I18nService } from '../i18n/i18n.service';
 
 describe('Ingest', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [Ingest],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
+    TestBed.inject(I18nService).setLanguage('pl');
   });
 
   it('should create the ingest page', () => {
@@ -54,6 +57,30 @@ describe('Ingest', () => {
 
     expect(component.validationError()).toContain('Polska');
     expect(component.canAddMeasurement()).toBeFalse();
+  });
+
+  it('should show English validation when language is English', () => {
+    TestBed.inject(I18nService).setLanguage('en');
+    const fixture = TestBed.createComponent(Ingest);
+    const httpMock = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+    httpMock.expectOne('http://localhost:8000/cities').flush([]);
+
+    const component = fixture.componentInstance as unknown as {
+      localityName: { set: (value: string) => void };
+      latitude: { set: (value: number) => void };
+      longitude: { set: (value: number) => void };
+      onCoordinatesChange: () => void;
+      validationError: () => string | null;
+    };
+
+    component.localityName.set('Berlin');
+    component.latitude.set(52.52);
+    component.longitude.set(13.405);
+    component.onCoordinatesChange();
+    fixture.detectChanges();
+
+    expect(component.validationError()).toContain('Poland only');
   });
 
   it('should enable the add button after filling name and Polish coordinates', () => {

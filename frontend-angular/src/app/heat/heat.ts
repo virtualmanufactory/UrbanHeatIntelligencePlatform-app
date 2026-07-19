@@ -4,16 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { HeatMeasurement } from '../heat-measurement';
 import { HeatMap } from '../heat-map/heat-map';
 import { HeatService } from '../heat.service';
+import { I18nService } from '../i18n/i18n.service';
+import { TranslatePipe } from '../i18n/translate.pipe';
 import { isInPoland } from '../poland';
 
 @Component({
   selector: 'app-heat',
-  imports: [DecimalPipe, FormsModule, HeatMap],
+  imports: [DecimalPipe, FormsModule, HeatMap, TranslatePipe],
   templateUrl: './heat.html',
   styleUrl: './heat.scss',
 })
 export class Heat {
   private readonly heatService = inject(HeatService);
+  private readonly i18n = inject(I18nService);
 
   protected readonly allMeasurements = signal<HeatMeasurement[]>([]);
   protected readonly measurements = signal<HeatMeasurement[]>([]);
@@ -70,10 +73,7 @@ export class Heat {
         this.fetchByDate();
       },
       error: (err) => {
-        this.error.set(
-          'Nie udało się pobrać danych z backendu (http://localhost:8080/api/heat). ' +
-            'Upewnij się, że backend jest uruchomiony.'
-        );
+        this.error.set(this.i18n.t('heat.errorLoad'));
         this.loading.set(false);
         console.error(err);
       },
@@ -89,7 +89,7 @@ export class Heat {
     const date = this.selectedDate();
     if (!date) {
       this.measurements.set([]);
-      this.error.set('Wybierz datę pomiaru.');
+      this.error.set(this.i18n.t('heat.errorSelectDate'));
       return;
     }
 
@@ -101,7 +101,7 @@ export class Heat {
         this.fetching.set(false);
       },
       error: (err) => {
-        this.error.set('Nie udało się pobrać pomiarów dla wybranej daty.');
+        this.error.set(this.i18n.t('heat.errorFetchByDate'));
         this.fetching.set(false);
         console.error(err);
       },
@@ -121,7 +121,7 @@ export class Heat {
         this.load();
       },
       error: (err) => {
-        this.error.set('Nie udało się usunąć pomiaru.');
+        this.error.set(this.i18n.t('heat.errorDelete'));
         this.deletingId.set(null);
         console.error(err);
       },

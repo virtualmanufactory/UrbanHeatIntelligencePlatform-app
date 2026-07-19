@@ -2,31 +2,31 @@
   <header class="hero">
     <div class="hero__content">
       <span class="hero__badge">Urban Heat Intelligence Platform</span>
-      <h1 class="hero__title">Dodaj pomiar miejscowości</h1>
+      <h1 class="hero__title">{{ 'ingest.title' | t }}</h1>
       <p class="hero__subtitle">
-        Wprowadź polską miejscowość i pobierz dla niej temperaturę z Google Earth Engine
+        {{ 'ingest.subtitle' | t }}
       </p>
     </div>
   </header>
 
   <section class="form-card">
-    <h2 class="form-card__title">Nowa miejscowość</h2>
+    <h2 class="form-card__title">{{ 'ingest.formTitle' | t }}</h2>
 
     <div class="form-grid">
       <label class="form-field">
-        <span class="form-field__label">Nazwa miejscowości</span>
+        <span class="form-field__label">{{ 'ingest.localityName' | t }}</span>
         <input
           class="form-field__input"
           type="text"
           [ngModel]="localityName()"
           (ngModelChange)="localityName.set($event)"
           [disabled]="ingesting()"
-          placeholder="np. Warszawa"
+          [placeholder]="'ingest.localityPlaceholder' | t"
         />
       </label>
 
       <label class="form-field">
-        <span class="form-field__label">Szerokość geogr.</span>
+        <span class="form-field__label">{{ 'ingest.latitude' | t }}</span>
         <input
           class="form-field__input"
           type="number"
@@ -41,7 +41,7 @@
       </label>
 
       <label class="form-field">
-        <span class="form-field__label">Długość geogr.</span>
+        <span class="form-field__label">{{ 'ingest.longitude' | t }}</span>
         <input
           class="form-field__input"
           type="number"
@@ -56,7 +56,7 @@
       </label>
 
       <label class="form-field">
-        <span class="form-field__label">Data pomiaru</span>
+        <span class="form-field__label">{{ 'ingest.measurementDate' | t }}</span>
         <input
           class="form-field__input"
           type="date"
@@ -67,9 +67,18 @@
     </div>
 
     <p class="form-card__hint">
-      Dozwolone są wyłącznie miejscowości w granicach Polski
-      (szer. {{ polandBounds.minLatitude }}–{{ polandBounds.maxLatitude }},
-      dł. {{ polandBounds.minLongitude }}–{{ polandBounds.maxLongitude }}).
+      {{
+        'ingest.boundsHint'
+          | t
+            : {
+                latShort: ('ingest.latShort' | t),
+                lonShort: ('ingest.lonShort' | t),
+                minLat: polandBounds.minLatitude,
+                maxLat: polandBounds.maxLatitude,
+                minLon: polandBounds.minLongitude,
+                maxLon: polandBounds.maxLongitude,
+              }
+      }}
     </p>
 
     @if (validationError()) {
@@ -77,17 +86,17 @@
     }
 
     <button class="btn" (click)="addMeasurement()" [disabled]="!canAddMeasurement()">
-      {{ ingesting() ? 'Dodawanie…' : 'Dodaj pomiar' }}
+      {{ (ingesting() ? 'ingest.adding' : 'ingest.add') | t }}
     </button>
   </section>
 
   <section class="bulk-card">
-    <h2 class="bulk-card__title">Miasta wojewódzkie</h2>
+    <h2 class="bulk-card__title">{{ 'ingest.capitalsTitle' | t }}</h2>
     <p class="bulk-card__hint">
-      Pobierz temperaturę dla wszystkich 16 stolic województw w wybranej dacie.
+      {{ 'ingest.capitalsHint' | t }}
     </p>
     <button class="btn btn--secondary" (click)="ingestVoivodeshipCapitals()" [disabled]="ingesting()">
-      {{ ingesting() ? 'Pobieranie…' : 'Pobierz dla wszystkich miast wojewódzkich' }}
+      {{ (ingesting() ? 'ingest.fetching' : 'ingest.capitalsButton') | t }}
     </button>
   </section>
 
@@ -96,11 +105,11 @@
   }
 
   @if (loadingSuggestions()) {
-    <div class="alert">Ładowanie przykładowych miejscowości…</div>
+    <div class="alert">{{ 'ingest.loadingSuggestions' | t }}</div>
   } @else if (suggestions().length > 0) {
     <section class="suggestions">
-      <h2 class="suggestions__title">Przykładowe miejscowości</h2>
-      <p class="suggestions__hint">Kliknij miejscowość, aby wypełnić formularz.</p>
+      <h2 class="suggestions__title">{{ 'ingest.suggestionsTitle' | t }}</h2>
+      <p class="suggestions__hint">{{ 'ingest.suggestionsHint' | t }}</p>
       <div class="suggestions__list">
         @for (locality of suggestions(); track locality.name) {
           <button
@@ -118,18 +127,18 @@
 
   @if (result()) {
     <section class="result">
-      <h2 class="result__title">Dodano pomiar</h2>
+      <h2 class="result__title">{{ 'ingest.resultTitle' | t }}</h2>
       <div class="stats">
         <div class="stat-card">
-          <span class="stat-card__label">Tryb GEE</span>
+          <span class="stat-card__label">{{ 'ingest.geeMode' | t }}</span>
           <span class="stat-card__value stat-card__value--small">{{ result()!.mode }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-card__label">Topic Kafka</span>
+          <span class="stat-card__label">{{ 'ingest.kafkaTopic' | t }}</span>
           <span class="stat-card__value stat-card__value--small">{{ result()!.topic }}</span>
         </div>
         <div class="stat-card stat-card--accent">
-          <span class="stat-card__label">Opublikowano</span>
+          <span class="stat-card__label">{{ 'ingest.published' | t }}</span>
           <span class="stat-card__value">{{ result()!.published }}</span>
         </div>
       </div>
@@ -138,11 +147,11 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Miejscowość</th>
-              <th>Szerokość geogr.</th>
-              <th>Długość geogr.</th>
-              <th>Temperatura</th>
-              <th>Data</th>
+              <th>{{ 'ingest.colLocality' | t }}</th>
+              <th>{{ 'ingest.colLatitude' | t }}</th>
+              <th>{{ 'ingest.colLongitude' | t }}</th>
+              <th>{{ 'ingest.colTemperature' | t }}</th>
+              <th>{{ 'ingest.colDate' | t }}</th>
             </tr>
           </thead>
           <tbody>
@@ -162,8 +171,8 @@
       </div>
 
       <p class="result__footer">
-        Pomiar trafi do bazy po przetworzeniu przez backend Java.
-        <a routerLink="/">Zobacz mapę pomiarów w Polsce</a>
+        {{ 'ingest.resultFooter' | t }}
+        <a routerLink="/">{{ 'ingest.viewMap' | t }}</a>
       </p>
     </section>
   }

@@ -2,29 +2,29 @@
   <header class="hero">
     <div class="hero__content">
       <span class="hero__badge">Urban Heat Intelligence Platform</span>
-      <h1 class="hero__title">Pomiary temperatury w Polsce</h1>
+      <h1 class="hero__title">{{ 'heat.title' | t }}</h1>
       <p class="hero__subtitle">
-        Zapisane pomiary miejscowości na terenie Polski
+        {{ 'heat.subtitle' | t }}
       </p>
     </div>
     <button class="btn" (click)="load()" [disabled]="loading() || fetching()">
-      {{ loading() ? 'Ładowanie…' : 'Odśwież' }}
+      {{ (loading() ? 'heat.loading' : 'heat.refresh') | t }}
     </button>
   </header>
 
   <section class="stats">
     <div class="stat-card">
-      <span class="stat-card__label">Liczba pomiarów</span>
+      <span class="stat-card__label">{{ 'heat.statCount' | t }}</span>
       <span class="stat-card__value">{{ count() }}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-card__label">Średnia temperatura</span>
+      <span class="stat-card__label">{{ 'heat.statAvg' | t }}</span>
       <span class="stat-card__value">
         {{ avgTemperature() !== null ? (avgTemperature() | number: '1.1-1') + ' °C' : '—' }}
       </span>
     </div>
     <div class="stat-card stat-card--accent">
-      <span class="stat-card__label">Maksymalna temperatura</span>
+      <span class="stat-card__label">{{ 'heat.statMax' | t }}</span>
       <span class="stat-card__value">
         {{ maxTemperature() !== null ? (maxTemperature() | number: '1.1-1') + ' °C' : '—' }}
       </span>
@@ -36,14 +36,14 @@
   }
 
   @if (loading() && allMeasurements().length === 0) {
-    <div class="alert">Ładowanie danych…</div>
+    <div class="alert">{{ 'heat.loadingData' | t }}</div>
   } @else {
     <section class="map-section">
       <div class="map-section__header">
-        <h2 class="map-section__title">Mapa pomiarów w Polsce</h2>
+        <h2 class="map-section__title">{{ 'heat.mapTitle' | t }}</h2>
         <div class="date-controls">
           <label class="date-filter">
-            <span class="date-filter__label">Data pomiaru</span>
+            <span class="date-filter__label">{{ 'heat.measurementDate' | t }}</span>
             <input
               class="date-filter__input"
               type="date"
@@ -53,19 +53,19 @@
             />
           </label>
           @if (fetching()) {
-            <span class="date-filter__status">Pobieranie…</span>
+            <span class="date-filter__status">{{ 'heat.fetching' | t }}</span>
           }
         </div>
       </div>
 
       @if (fetching() && polishMeasurements().length === 0) {
-        <div class="alert">Pobieranie pomiarów dla wybranej daty…</div>
+        <div class="alert">{{ 'heat.fetchingForDate' | t }}</div>
       }
 
       <app-heat-map [measurements]="polishMeasurements()" />
 
       @if (!fetching() && polishMeasurements().length === 0) {
-        <div class="alert">Brak pomiarów dla wybranej daty.</div>
+        <div class="alert">{{ 'heat.noMeasurementsForDate' | t }}</div>
       }
     </section>
 
@@ -74,12 +74,12 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Miejscowość</th>
-              <th>Data</th>
-              <th>Szerokość geogr.</th>
-              <th>Długość geogr.</th>
-              <th>Temperatura</th>
+              <th>{{ 'heat.colIndex' | t }}</th>
+              <th>{{ 'heat.colLocality' | t }}</th>
+              <th>{{ 'heat.colDate' | t }}</th>
+              <th>{{ 'heat.colLatitude' | t }}</th>
+              <th>{{ 'heat.colLongitude' | t }}</th>
+              <th>{{ 'heat.colTemperature' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -102,7 +102,7 @@
                       (click)="deleteMeasurement(m)"
                       [disabled]="deletingId() === m.id"
                     >
-                      {{ deletingId() === m.id ? 'Usuwanie…' : 'Usuń' }}
+                      {{ (deletingId() === m.id ? 'heat.deleting' : 'heat.delete') | t }}
                     </button>
                   }
                 </td>

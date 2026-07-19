@@ -6,12 +6,15 @@ import {
   OnDestroy,
   computed,
   effect,
+  inject,
   input,
   signal,
   viewChild,
 } from '@angular/core';
 import * as L from 'leaflet';
 import { HeatMeasurement } from '../heat-measurement';
+import { I18nService } from '../i18n/i18n.service';
+import { TranslatePipe } from '../i18n/translate.pipe';
 import {
   getPolandLeafletBounds,
   isInPoland,
@@ -38,11 +41,13 @@ export function temperatureLegendGradient(min: number, max: number): string {
 
 @Component({
   selector: 'app-heat-map',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, TranslatePipe],
   templateUrl: './heat-map.html',
   styleUrl: './heat-map.scss',
 })
 export class HeatMap implements AfterViewInit, OnDestroy {
+  private readonly i18n = inject(I18nService);
+
   readonly measurements = input<HeatMeasurement[]>([]);
 
   protected readonly minTemp = computed(() => {
@@ -79,6 +84,8 @@ export class HeatMap implements AfterViewInit, OnDestroy {
       // Previously an early return on a plain boolean skipped this read, so markers
       // rendered once and never updated after date changes.
       const measurements = this.measurements();
+      // Re-render popups when the UI language changes.
+      this.i18n.language();
       if (!this.viewReady()) {
         return;
       }
@@ -152,7 +159,7 @@ export class HeatMap implements AfterViewInit, OnDestroy {
       });
 
       marker.bindPopup(
-        `<strong>${measurement.name ?? 'Pomiar'}</strong><br>` +
+        `<strong>${measurement.name ?? this.i18n.t('map.measurementFallback')}</strong><br>` +
           `<strong>${measurement.temperature.toFixed(1)} °C</strong><br>` +
           `${measurement.latitude.toFixed(4)}, ${measurement.longitude.toFixed(4)}` +
           (measurement.measurementDate ? `<br>${measurement.measurementDate}` : '')

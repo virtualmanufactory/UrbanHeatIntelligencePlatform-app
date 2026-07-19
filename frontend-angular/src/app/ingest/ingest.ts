@@ -2,18 +2,21 @@ import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { I18nService } from '../i18n/i18n.service';
+import { TranslatePipe } from '../i18n/translate.pipe';
 import { isInPoland, POLAND_BOUNDS } from '../poland';
 import { IngestPoint, IngestResponse } from './ingest.models';
 import { IngestService } from './ingest.service';
 
 @Component({
   selector: 'app-ingest',
-  imports: [DecimalPipe, FormsModule, RouterLink],
+  imports: [DecimalPipe, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './ingest.html',
   styleUrl: './ingest.scss',
 })
 export class Ingest implements OnInit {
   private readonly ingestService = inject(IngestService);
+  private readonly i18n = inject(I18nService);
 
   protected readonly polandBounds = POLAND_BOUNDS;
   protected readonly suggestions = signal<IngestPoint[]>([]);
@@ -62,10 +65,7 @@ export class Ingest implements OnInit {
         this.loadingSuggestions.set(false);
       },
       error: (err) => {
-        this.error.set(
-          'Nie udało się pobrać przykładowych miejscowości z backendu GIS (http://localhost:8000/cities). ' +
-            'Upewnij się, że backend-python-gis jest uruchomiony.'
-        );
+        this.error.set(this.i18n.t('ingest.errorLoadSuggestions'));
         this.loadingSuggestions.set(false);
         console.error(err);
       },
@@ -89,8 +89,14 @@ export class Ingest implements OnInit {
 
     if (!isInPoland(latitude, longitude)) {
       this.validationError.set(
-        `Dozwolone współrzędne: szer. ${POLAND_BOUNDS.minLatitude}–${POLAND_BOUNDS.maxLatitude}, ` +
-          `dł. ${POLAND_BOUNDS.minLongitude}–${POLAND_BOUNDS.maxLongitude} (tylko Polska).`
+        this.i18n.t('ingest.errorCoordinates', {
+          latShort: this.i18n.t('ingest.latShort'),
+          lonShort: this.i18n.t('ingest.lonShort'),
+          minLat: POLAND_BOUNDS.minLatitude,
+          maxLat: POLAND_BOUNDS.maxLatitude,
+          minLon: POLAND_BOUNDS.minLongitude,
+          maxLon: POLAND_BOUNDS.maxLongitude,
+        })
       );
       return;
     }
@@ -101,7 +107,7 @@ export class Ingest implements OnInit {
   protected addMeasurement(): void {
     const name = this.localityName().trim();
     if (!name) {
-      this.validationError.set('Podaj nazwę miejscowości.');
+      this.validationError.set(this.i18n.t('ingest.errorNameRequired'));
       return;
     }
 
@@ -131,9 +137,7 @@ export class Ingest implements OnInit {
         this.runIngest(capitals);
       },
       error: (err) => {
-        this.error.set(
-          'Nie udało się pobrać listy miast wojewódzkich (http://localhost:8000/voivodeship-capitals).'
-        );
+        this.error.set(this.i18n.t('ingest.errorLoadCapitals'));
         console.error(err);
       },
     });
@@ -146,7 +150,7 @@ export class Ingest implements OnInit {
 
     if (outsidePoland) {
       this.validationError.set(
-        `Miejscowość '${outsidePoland.name}' musi leżeć na terenie Polski.`
+        this.i18n.t('ingest.errorOutsidePoland', { name: outsidePoland.name })
       );
       return false;
     }
@@ -179,7 +183,7 @@ export class Ingest implements OnInit {
           this.error.set(
             typeof backendMessage === 'string'
               ? backendMessage
-              : 'Nie udało się dodać pomiaru. Dozwolone są wyłącznie miejscowości w Polsce.'
+              : this.i18n.t('ingest.errorAdd')
           );
           this.ingesting.set(false);
           console.error(err);
